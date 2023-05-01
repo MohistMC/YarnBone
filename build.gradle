@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "https://maven.mohistmc.com/" }
+    maven { url = "https://repo.papermc.io/repository/maven-public/" }
+    maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi" }
+    maven { url = "https://jitpack.io" }
+    maven { url = "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url = 'https://libraries.minecraft.net/' }
+    maven { url = 'https://maven.fabricmc.net/' }
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:24.0.1'
+    implementation("com.mojang:datafixerupper:6.0.6")
+    implementation("com.mojang:logging:1.1.1")
+    implementation("org.joml:joml:1.10.5")
+    implementation("org.slf4j:slf4j-api:2.0.6")
+    implementation("org.slf4j:jcl-over-slf4j:2.0.5")
+    implementation('com.mojang:brigadier:1.0.18')
+
+    implementation 'io.netty:netty-buffer:4.1.82.Final'
+    implementation 'io.netty:netty-codec:4.1.82.Final'
+    implementation 'io.netty:netty-common:4.1.82.Final'
+    implementation 'io.netty:netty-handler:4.1.82.Final'
+    implementation 'io.netty:netty-resolver:4.1.82.Final'
+    implementation 'io.netty:netty-transport:4.1.82.Final'
+    implementation 'io.netty:netty-transport-classes-epoll:4.1.82.Final'
+    implementation 'io.netty:netty-transport-native-unix-common:4.1.82.Final'
+}
+
+test {
+    useJUnitPlatform()
+}

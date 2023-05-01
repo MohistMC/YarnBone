@@ -1,0 +1,39 @@
+/*
+ * Decompiled with CFR 0.1.1 (FabricMC 57d88659).
+ */
+package net.minecraft.world.gen.blockpredicate;
+
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.gen.blockpredicate.BlockPredicate;
+import net.minecraft.world.gen.blockpredicate.BlockPredicateType;
+
+class NotBlockPredicate
+implements BlockPredicate {
+    public static final Codec<NotBlockPredicate> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockPredicate.BASE_CODEC.fieldOf("predicate")).forGetter(predicate -> predicate.predicate)).apply((Applicative<NotBlockPredicate, ?>)instance, NotBlockPredicate::new));
+    private final BlockPredicate predicate;
+
+    public NotBlockPredicate(BlockPredicate predicate) {
+        this.predicate = predicate;
+    }
+
+    @Override
+    public boolean test(StructureWorldAccess arg, BlockPos arg2) {
+        return !this.predicate.test(arg, arg2);
+    }
+
+    @Override
+    public BlockPredicateType<?> getType() {
+        return BlockPredicateType.NOT;
+    }
+
+    @Override
+    public /* synthetic */ boolean test(Object world, Object pos) {
+        return this.test((StructureWorldAccess)world, (BlockPos)pos);
+    }
+}
+

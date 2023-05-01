@@ -1,0 +1,162 @@
+/*
+ * Decompiled with CFR 0.1.1 (FabricMC 57d88659).
+ * 
+ * Could not load the following classes:
+ *  org.jetbrains.annotations.Nullable
+ */
+package net.minecraft.entity.decoration;
+
+import java.util.List;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.decoration.AbstractDecorationEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
+import org.jetbrains.annotations.Nullable;
+
+public class LeashKnotEntity
+extends AbstractDecorationEntity {
+    public static final double field_30455 = 0.375;
+
+    public LeashKnotEntity(EntityType<? extends LeashKnotEntity> arg, World arg2) {
+        super((EntityType<? extends AbstractDecorationEntity>)arg, arg2);
+    }
+
+    public LeashKnotEntity(World world, BlockPos pos) {
+        super(EntityType.LEASH_KNOT, world, pos);
+        this.setPosition(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    @Override
+    protected void updateAttachmentPosition() {
+        this.setPos((double)this.attachmentPos.getX() + 0.5, (double)this.attachmentPos.getY() + 0.375, (double)this.attachmentPos.getZ() + 0.5);
+        double d = (double)this.getType().getWidth() / 2.0;
+        double e = this.getType().getHeight();
+        this.setBoundingBox(new Box(this.getX() - d, this.getY(), this.getZ() - d, this.getX() + d, this.getY() + e, this.getZ() + d));
+    }
+
+    @Override
+    public void setFacing(Direction facing) {
+    }
+
+    @Override
+    public int getWidthPixels() {
+        return 9;
+    }
+
+    @Override
+    public int getHeightPixels() {
+        return 9;
+    }
+
+    @Override
+    protected float getEyeHeight(EntityPose pose, EntityDimensions dimensions) {
+        return 0.0625f;
+    }
+
+    @Override
+    public boolean shouldRender(double distance) {
+        return distance < 1024.0;
+    }
+
+    @Override
+    public void onBreak(@Nullable Entity entity) {
+        this.playSound(SoundEvents.ENTITY_LEASH_KNOT_BREAK, 1.0f, 1.0f);
+    }
+
+    @Override
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+    }
+
+    @Override
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+    }
+
+    @Override
+    public ActionResult interact(PlayerEntity player, Hand hand) {
+        if (this.world.isClient) {
+            return ActionResult.SUCCESS;
+        }
+        boolean bl = false;
+        double d = 7.0;
+        List<MobEntity> list = this.world.getNonSpectatingEntities(MobEntity.class, new Box(this.getX() - 7.0, this.getY() - 7.0, this.getZ() - 7.0, this.getX() + 7.0, this.getY() + 7.0, this.getZ() + 7.0));
+        for (MobEntity lv : list) {
+            if (lv.getHoldingEntity() != player) continue;
+            lv.attachLeash(this, true);
+            bl = true;
+        }
+        boolean bl2 = false;
+        if (!bl) {
+            this.discard();
+            if (player.getAbilities().creativeMode) {
+                for (MobEntity lv2 : list) {
+                    if (!lv2.isLeashed() || lv2.getHoldingEntity() != this) continue;
+                    lv2.detachLeash(true, false);
+                    bl2 = true;
+                }
+            }
+        }
+        if (bl || bl2) {
+            this.emitGameEvent(GameEvent.BLOCK_ATTACH, player);
+        }
+        return ActionResult.CONSUME;
+    }
+
+    @Override
+    public boolean canStayAttached() {
+        return this.world.getBlockState(this.attachmentPos).isIn(BlockTags.FENCES);
+    }
+
+    public static LeashKnotEntity getOrCreate(World world, BlockPos pos) {
+        int i = pos.getX();
+        int j = pos.getY();
+        int k = pos.getZ();
+        List<LeashKnotEntity> list = world.getNonSpectatingEntities(LeashKnotEntity.class, new Box((double)i - 1.0, (double)j - 1.0, (double)k - 1.0, (double)i + 1.0, (double)j + 1.0, (double)k + 1.0));
+        for (LeashKnotEntity lv : list) {
+            if (!lv.getDecorationBlockPos().equals(pos)) continue;
+            return lv;
+        }
+        LeashKnotEntity lv2 = new LeashKnotEntity(world, pos);
+        world.spawnEntity(lv2);
+        return lv2;
+    }
+
+    @Override
+    public void onPlace() {
+        this.playSound(SoundEvents.ENTITY_LEASH_KNOT_PLACE, 1.0f, 1.0f);
+    }
+
+    @Override
+    public Packet<ClientPlayPacketListener> createSpawnPacket() {
+        return new EntitySpawnS2CPacket(this, 0, this.getDecorationBlockPos());
+    }
+
+    @Override
+    public Vec3d getLeashPos(float delta) {
+        return this.getLerpedPos(delta).add(0.0, 0.2, 0.0);
+    }
+
+    @Override
+    public ItemStack getPickBlockStack() {
+        return new ItemStack(Items.LEAD);
+    }
+}
+
